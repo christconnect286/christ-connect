@@ -84,6 +84,7 @@ a{color:inherit}
   <div class="section-title"><h2>🙏 Prière</h2></div>
   <div class="card"><div class="label">Créer un sujet de prière</div><textarea id="prayerText" placeholder="Écris ton sujet..."></textarea><br><br><button class="primary" onclick="addPrayer()">Ajouter</button></div>
   <div id="prayerList"></div>
+  <div class="sub" style="text-align:center;margin:6px 0 14px">Tes sujets sont gardés sur ce téléphone.</div>
 </section>
 
 <section id="communaute" class="screen">
@@ -113,8 +114,9 @@ a{color:inherit}
 
 <section id="medias" class="screen">
   <div class="section-title"><h2>🎥 Médias</h2></div>
-  <div class="card"><b>1 Minute avec Jésus</b><p>Une parole. Une inspiration. Une prière.</p><button class="primary" onclick="alert('Lecteur vidéo à connecter dans la V2.')">▶ Lire</button></div>
-  <div class="card"><b>Chroniques de la Bible</b><p class="sub">Des histoires bibliques courtes et captivantes.</p><button class="secondary">Découvrir</button></div>
+  <div class="card"><b>1 Minute avec Jésus</b><p>Une parole. Une inspiration. Une prière.</p></div>
+  <div class="card"><div class="label">Ajouter une vidéo YouTube</div><input id="vidTitle" placeholder="Titre de la vidéo"><br><br><input id="vidUrl" placeholder="Colle le lien YouTube ici"><br><br><button class="primary" onclick="addVideo()">Ajouter</button></div>
+  <div id="videoList"></div>
 </section>
 </main>
 
@@ -140,6 +142,7 @@ let state=JSON.parse(localStorage.getItem('cc_state')||'null')||{
  msgs:[{from:"Eunice",text:"Shalom ! Que Dieu te bénisse 🙏🏽"},{from:"me",text:"Amen ! Merci, à toi aussi."}]
 };
 function save(){localStorage.setItem('cc_state',JSON.stringify(state))}
+state.prayers=(state.prayers||[]).map(p=>typeof p==='string'?{t:p,d:'',done:false}:p);state.videos=state.videos||[];
 function login(){
  const name=document.getElementById('loginName').value.trim()||"Ami de Christ";
  const email=document.getElementById('loginEmail').value.trim()||"demo@christconnect.app";
@@ -157,16 +160,18 @@ function go(id){
  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
  document.getElementById(id).classList.add('active');
  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.go===id));
- if(id==='communaute')renderFeed(); if(id==='amis')renderFriends(); if(id==='messages')renderChat(); if(id==='priere')renderPrayers(); if(id==='bible')renderBible();
+ if(id==='communaute')renderFeed(); if(id==='amis')renderFriends(); if(id==='messages')renderChat(); if(id==='priere')renderPrayers(); if(id==='bible')renderBible(); if(id==='medias')renderMedias();
 }
 const BIB='https://bible.helloao.org/api/fra_lsg/';
 let bib={books:null,loading:false,bk:0,ch:1,verses:[]};
 async function bibGet(p){const r=await fetch(BIB+p);if(!r.ok)throw new Error(r.status);return r.json()}
 function vtxt(c){return (Array.isArray(c)?c:[c]).map(x=>typeof x==='string'?x:(x&&x.text)||'').join(' ').replace(/\s+/g,' ').trim()}
+const PETITS=['de','des','du','la','le','les','aux','et','d','l'];
+function bname(b){let n=(b.commonName||b.name||'').toLowerCase().replace(/(^|[\s'’-])(\p{L})/gu,(m,a,c)=>a+c.toUpperCase());return n.split(' ').map((w,i)=>i&&PETITS.includes(w.toLowerCase())?w.toLowerCase():w).join(' ')}
 async function bibInit(){
  if(bib.books||bib.loading)return;bib.loading=true;const st=document.getElementById('bibStatus');st.textContent='Chargement de la Bible…';
  try{const j=await bibGet('books.json');bib.books=j.books;
-  document.getElementById('bkSel').innerHTML=bib.books.map((b,i)=>`<option value="${i}">${escapeHtml(b.commonName||b.name)}</option>`).join('');
+  document.getElementById('bkSel').innerHTML=bib.books.map((b,i)=>`<option value="${i}">${escapeHtml(bname(b))}</option>`).join('');
   let jn=bib.books.findIndex(b=>b.id==='JHN');if(jn<0)jn=0;document.getElementById('bkSel').value=jn;bib.bk=jn;bibFillCh(3);
   await bibOpen();
  }catch(e){bib.books=null;st.textContent='Impossible de charger la Bible. Connecte-toi à internet une première fois, puis réessaie.'}
@@ -178,7 +183,7 @@ async function bibOpen(){
  st.textContent='Chargement…';
  try{const j=await bibGet(b.id+'/'+bib.ch+'.json');
   bib.verses=(j.chapter.content||[]).filter(x=>x.type==='verse').map(x=>({n:x.number,t:vtxt(x.content)}));
-  st.textContent=(b.commonName||b.name)+' '+bib.ch+' — Louis Segond 1910';renderBible(document.getElementById('bibSearch').value)
+  st.textContent=bname(b)+' '+bib.ch+' — Louis Segond 1910';renderBible(document.getElementById('bibSearch').value)
  }catch(e){bib.verses=[];st.textContent='Chapitre indisponible hors connexion. Réessaie avec internet.';renderBible()}}
 function bibStep(d){const ch=document.getElementById('chSel'),n=bib.books?bib.books[bib.bk].numberOfChapters:0;if(!n)return;let c=bib.ch+d;
  if(c<1){if(bib.bk===0)return;bib.bk--;document.getElementById('bkSel').value=bib.bk;bibFillCh(bib.books[bib.bk].numberOfChapters)}
@@ -190,8 +195,10 @@ function renderBible(q=""){
  document.getElementById('bibleList').innerHTML=v.length?'<div class="card">'+v.map(x=>`<p style="line-height:1.55;margin:0 0 10px"><b style="color:var(--gold)">${escapeHtml(String(x.n))}</b> ${escapeHtml(x.t)}</p>`).join('')+'</div>':'<div class="empty">Aucun verset.</div>'}
 function filterBible(v){renderBible(v)}
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
-function addPrayer(){let t=document.getElementById('prayerText').value.trim();if(!t)return;state.prayers.unshift(t);save();document.getElementById('prayerText').value='';renderPrayers()}
-function renderPrayers(){document.getElementById('prayerList').innerHTML=state.prayers.map((p,i)=>`<div class="card">🙏 ${p}<div class="actions" style="margin-top:8px"><button class="secondary" onclick="state.prayers.splice(${i},1);save();renderPrayers()">Supprimer</button></div></div>`).join('')}
+function addPrayer(){let t=document.getElementById('prayerText').value.trim();if(!t)return;state.prayers.unshift({t:t,d:new Date().toLocaleDateString('fr-FR'),done:false});save();document.getElementById('prayerText').value='';renderPrayers()}
+function togglePrayer(i){state.prayers[i].done=!state.prayers[i].done;save();renderPrayers()}
+function delPrayer(i){if(confirm('Supprimer ce sujet de prière ?')){state.prayers.splice(i,1);save();renderPrayers()}}
+function renderPrayers(){document.getElementById('prayerList').innerHTML=state.prayers.map((p,i)=>`<div class="card">${p.done?'✅':'🙏'} ${escapeHtml(p.t)}${p.d?`<div class="time" style="margin-top:6px">${escapeHtml(p.d)}${p.done?' · Exaucée, gloire à Dieu !':''}</div>`:''}<div class="actions" style="margin-top:8px"><button class="secondary" onclick="togglePrayer(${i})">${p.done?'Rouvrir':'Exaucée ✓'}</button><button class="secondary" onclick="delPrayer(${i})">Supprimer</button></div></div>`).join('')||'<div class="empty">Aucun sujet de prière pour le moment.</div>'}
 function addPost(){let t=document.getElementById('postText').value.trim();if(!t)return;state.posts.unshift({name:state.user.name,text:t,likes:0});save();document.getElementById('postText').value='';renderFeed()}
 function renderFeed(){document.getElementById('feed').innerHTML=state.posts.map((p,i)=>`<div class="post"><div class="post-head"><div class="smallavatar">${p.name[0]}</div><div><div class="post-name">${p.name}</div><div class="time">Maintenant</div></div></div><div class="post-text">${escapeHtml(p.text)}</div><div class="actions"><button class="secondary" onclick="state.posts[${i}].likes++;save();renderFeed()">❤️ ${p.likes}</button><button class="secondary" onclick="go('messages')">💬 Écrire</button></div></div>`).join('')}
 function renderFriends(){
@@ -204,7 +211,12 @@ function addFriend(id){let f=state.friends.find(x=>x.id===id);f.friend=true;save
 function renderChat(){document.getElementById('chat').innerHTML=state.msgs.map(m=>`<div class="chat ${m.from==='me'?'me':''}"><div class="bubble">${escapeHtml(m.text)}</div></div>`).join('')}
 function sendMsg(){let t=document.getElementById('msgText').value.trim();if(!t)return;state.msgs.push({from:"me",text:t});save();document.getElementById('msgText').value='';renderChat()}
 function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
-function renderAll(){renderBible();renderPrayers();renderFeed();renderFriends();renderChat()}
+function ytId(u){let m=(u||'').match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/);return m?m[1]:null}
+function addVideo(){let t=document.getElementById('vidTitle').value.trim(),id=ytId(document.getElementById('vidUrl').value);if(!id){alert('Lien YouTube non reconnu. Copie le lien depuis YouTube (Partager > Copier le lien).');return}
+ state.videos.unshift({t:t||'Vidéo',id:id});save();document.getElementById('vidTitle').value='';document.getElementById('vidUrl').value='';renderMedias()}
+function delVideo(i){if(confirm('Retirer cette vidéo ?')){state.videos.splice(i,1);save();renderMedias()}}
+function renderMedias(){document.getElementById('videoList').innerHTML=state.videos.map((v,i)=>`<div class="card"><b>${escapeHtml(v.t)}</b><iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(v.id)}" loading="lazy" allowfullscreen style="width:100%;aspect-ratio:16/9;border:0;border-radius:14px;margin-top:10px"></iframe><div class="actions" style="margin-top:8px"><button class="secondary" onclick="delVideo(${i})">Retirer</button></div></div>`).join('')||'<div class="empty">Ajoute ta première vidéo avec un lien YouTube.</div>'}
+function renderAll(){renderMedias();renderBible();renderPrayers();renderFeed();renderFriends();renderChat()}
 if(state.user)showApp();
 </script>
 </body>
