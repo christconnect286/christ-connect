@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#102a43">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Christ Connect">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>CHRIST CONNECT — Prototype</title>
+<style>
+:root{--navy:#102a43;--gold:#f4a51c;--bg:#f6f8fb;--text:#17212b;--muted:#687789;--card:#fff;--green:#2e9d61;--purple:#7450c9}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:var(--text)}
+.app{max-width:480px;margin:auto;min-height:100vh;background:var(--bg);padding-bottom:78px}
+header{background:linear-gradient(145deg,#dff2ff,#fff);padding:18px 18px 20px;border-radius:0 0 28px 28px}
+.top{display:flex;align-items:center;justify-content:space-between}.logo{font-weight:900;font-size:23px;color:var(--navy)}.logo span{color:var(--gold)}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:800}
+h1{font-size:27px;margin:20px 0 4px}.sub{color:var(--muted)}
+main{padding:16px}.card{background:var(--card);border-radius:20px;padding:17px;margin-bottom:14px;box-shadow:0 5px 20px #102a4312}
+.verse{border-left:5px solid var(--gold)}.label{font-weight:800;color:var(--navy);margin-bottom:8px}.ref{color:var(--gold);font-weight:800;margin-top:8px}
+.quick{display:grid;grid-template-columns:1fr 1fr;gap:10px}.tile{border:0;border-radius:18px;padding:17px;color:#fff;font-weight:800;font-size:16px;text-align:left;cursor:pointer}.b{background:var(--navy)}.p{background:var(--green)}.c{background:var(--purple)}.m{background:#ef8b12}
+.section-title{display:flex;justify-content:space-between;align-items:center;margin:20px 0 10px}.section-title h2{margin:0;font-size:20px}
+input,textarea,select{width:100%;padding:12px;border:1px solid #d7dee8;border-radius:12px;font:inherit;background:#fff}textarea{min-height:80px;resize:vertical}
+button{font:inherit;cursor:pointer}.primary{background:var(--navy);color:#fff;border:0;border-radius:12px;padding:12px 16px;font-weight:800}.secondary{background:#eef2f7;color:var(--navy);border:0;border-radius:12px;padding:10px 13px;font-weight:700}
+.post{padding:15px 0;border-top:1px solid #edf0f4}.post:first-child{border-top:0}.post-head{display:flex;gap:10px;align-items:center}.smallavatar{width:38px;height:38px;border-radius:50%;background:#dbe8f5;display:grid;place-items:center;font-weight:800;color:var(--navy)}.post-name{font-weight:800}.time{font-size:12px;color:var(--muted)}.post-text{margin:12px 0;line-height:1.45}.actions{display:flex;gap:8px;flex-wrap:wrap}
+.friend{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #edf0f4}.friend:last-child{border:0}.friend-info{display:flex;gap:10px;align-items:center}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);background:#fff;border-top:1px solid #e3e7ee;display:grid;grid-template-columns:repeat(5,1fr);padding:8px 4px 10px;z-index:5}.nav button{border:0;background:transparent;color:#687789;font-size:11px;font-weight:700;padding:5px}.nav button.active{color:var(--purple)}.nav .ico{display:block;font-size:21px;margin-bottom:2px}
+.screen{display:none}.screen.active{display:block}
+.login{min-height:100vh;display:grid;place-items:center;padding:25px;background:linear-gradient(160deg,#dff2ff,#fff8e8)}.loginbox{width:min(420px,100%);background:#fff;border-radius:28px;padding:28px;box-shadow:0 15px 45px #102a4320}.loginbox h1{margin-top:0}.field{margin:10px 0}.field label{display:block;font-weight:700;font-size:13px;margin-bottom:6px}
+.chat{display:flex;gap:10px;margin:12px 0}.bubble{background:#edf2f7;border-radius:16px;padding:10px 13px;max-width:80%}.me{justify-content:flex-end}.me .bubble{background:#e9ddff}.chatbox{display:flex;gap:8px;position:sticky;bottom:72px;background:var(--bg);padding:8px 0}
+.notice{padding:12px;border-radius:14px;background:#fff3d6;color:#684c00;font-size:13px;margin-bottom:12px}
+.empty{text-align:center;padding:25px;color:var(--muted)}
+a{color:inherit}
+</style>
+</head>
+<body>
+<div id="login" class="login">
+  <div class="loginbox">
+    <div class="logo">✝ CHRIST <span>CONNECT</span></div>
+    <p class="sub">Connecté à Christ, connecté aux autres.</p>
+    <h1>Bienvenue 👋</h1>
+    <div class="field"><label>Nom</label><input id="loginName" placeholder="Ex. Abraham"></div>
+    <div class="field"><label>Email</label><input id="loginEmail" type="email" placeholder="vous@exemple.com"></div>
+    <div class="field"><label>Mot de passe</label><input id="loginPass" type="password" placeholder="••••••••"></div>
+    <button class="primary" style="width:100%;margin-top:8px" onclick="login()">Créer mon compte / Se connecter</button>
+    <p class="sub" style="font-size:12px;margin-top:14px">Prototype local : aucune donnée n'est envoyée sur Internet.</p>
+  </div>
+</div>
+
+<div id="app" class="app" style="display:none">
+<header>
+  <div class="top"><div class="logo">✝ CHRIST <span>CONNECT</span></div><button class="secondary" onclick="logout()">Sortir</button></div>
+  <h1 id="welcome">Bienvenue ! 👋</h1><div class="sub">Que Dieu te bénisse aujourd'hui.</div>
+</header>
+
+<main>
+<section id="home" class="screen active">
+  <div class="card verse"><div class="label">📖 Verset du jour</div><div>« Ta parole est une lampe à mes pieds, et une lumière sur mon sentier. »</div><div class="ref">Psaume 119:105</div></div>
+  <div class="card"><div class="label">💡 Pensée du jour</div><div>Dieu ne t'appelle pas à tout comprendre aujourd'hui, mais à lui faire confiance et à avancer avec lui.</div></div>
+  <div class="section-title"><h2>Accès rapide</h2></div>
+  <div class="quick">
+    <button class="tile b" onclick="go('bible')">📖<br>BIBLE<br><small>Lire la Parole</small></button>
+    <button class="tile p" onclick="go('priere')">🙏<br>PRIÈRE<br><small>Parler à Dieu</small></button>
+    <button class="tile c" onclick="go('communaute')">👥<br>COMMUNAUTÉ<br><small>Échanger</small></button>
+    <button class="tile m" onclick="go('medias')">▶️<br>MÉDIAS<br><small>Voir & écouter</small></button>
+  </div>
+  <div class="card" style="background:var(--navy);color:#fff;margin-top:14px"><b>⏱ 1 MINUTE AVEC JÉSUS</b><p>Une parole. Une inspiration. Une prière.</p><button class="secondary" onclick="alert('Démo : la vidéo sera ajoutée dans la prochaine version.')">Regarder maintenant</button></div>
+</section>
+
+<section id="bible" class="screen">
+  <div class="section-title"><h2>📖 Bible</h2></div>
+  <div class="card"><select id="bkSel" onchange="bibBook()"></select>
+   <div style="display:flex;gap:8px;margin-top:8px"><select id="chSel"></select><button class="primary" onclick="bibOpen()">Lire</button></div></div>
+  <div class="card"><input id="bibSearch" placeholder="Rechercher dans le chapitre ouvert" oninput="renderBible(this.value)"></div>
+  <div id="bibStatus" class="sub" style="margin:0 4px 10px"></div>
+  <div id="bibleList"></div>
+  <div style="display:flex;gap:8px;margin-bottom:14px"><button class="secondary" onclick="bibStep(-1)">← Précédent</button><button class="secondary" onclick="bibStep(1)">Suivant →</button></div>
+</section>
+
+<section id="priere" class="screen">
+  <div class="section-title"><h2>🙏 Prière</h2></div>
+  <div class="card"><div class="label">Créer un sujet de prière</div><textarea id="prayerText" placeholder="Écris ton sujet..."></textarea><br><br><button class="primary" onclick="addPrayer()">Ajouter</button></div>
+  <div id="prayerList"></div>
+  <div class="sub" style="text-align:center;margin:6px 0 14px">Tes sujets sont gardés sur ce téléphone.</div>
+</section>
+
+<section id="communaute" class="screen">
+  <div class="section-title"><h2>👥 Communauté</h2><button class="secondary" onclick="go('amis')">Amis</button></div>
+  <div class="card"><textarea id="postText" placeholder="Partage une pensée, un témoignage ou un encouragement..."></textarea><br><br><button class="primary" onclick="addPost()">Publier</button></div>
+  <div class="notice">💜 Respect et bienveillance : bloque ou signale tout contenu inapproprié. Les rencontres et messages privés doivent respecter les règles de sécurité.</div>
+  <div class="card" id="feed"></div>
+</section>
+
+<section id="amis" class="screen">
+  <div class="section-title"><h2>🤝 Mes amis</h2></div>
+  <div class="card" id="friends"></div>
+  <div class="card"><div class="label">Découvrir des personnes</div><input id="friendSearch" placeholder="Rechercher un prénom" oninput="renderFriends()"><div id="discover"></div></div>
+</section>
+
+<section id="messages" class="screen">
+  <div class="section-title"><h2>💬 Messagerie</h2></div>
+  <div class="card"><div class="label">Conversation de démonstration</div><div id="chat"></div>
+  <div class="chatbox"><input id="msgText" placeholder="Écrire un message..."><button class="primary" onclick="sendMsg()">Envoyer</button></div></div>
+</section>
+
+<section id="profil" class="screen">
+  <div class="section-title"><h2>👤 Mon profil</h2></div>
+  <div class="card"><div class="smallavatar" style="width:62px;height:62px;font-size:22px" id="profileAvatar">A</div><h2 id="profileName">Utilisateur</h2><p class="sub" id="profileEmail"></p><p>« Ma foi grandit chaque jour. »</p><button class="secondary" onclick="alert('Dans la V2 : modification du profil, photo, centres d’intérêt et confidentialité.')">Modifier mon profil</button></div>
+  <div class="card"><b>🔐 Confidentialité</b><p class="sub">Dans la version complète : contrôle des messages, blocage, signalement, modération et protections adaptées aux mineurs.</p></div>
+</section>
+
+<section id="medias" class="screen">
+  <div class="section-title"><h2>🎥 Médias</h2></div>
+  <div class="card"><b>1 Minute avec Jésus</b><p>Une parole. Une inspiration. Une prière.</p></div>
+  <div class="card"><div class="label">Ajouter une vidéo YouTube</div><input id="vidTitle" placeholder="Titre de la vidéo"><br><br><input id="vidUrl" placeholder="Colle le lien YouTube ici"><br><br><button class="primary" onclick="addVideo()">Ajouter</button></div>
+  <div id="videoList"></div>
+</section>
+</main>
+
+<nav class="nav">
+<button class="active" data-go="home" onclick="go('home')"><span class="ico">⌂</span>Accueil</button>
+<button data-go="bible" onclick="go('bible')"><span class="ico">📖</span>Bible</button>
+<button data-go="priere" onclick="go('priere')"><span class="ico">🙏</span>Prière</button>
+<button data-go="communaute" onclick="go('communaute')"><span class="ico">👥</span>Communauté</button>
+<button data-go="profil" onclick="go('profil')"><span class="ico">👤</span>Profil</button>
+</nav>
+</div>
+
+<script>
+const seedFriends=[
+ {id:1,name:"Samuel",city:"Abidjan",friend:false},{id:2,name:"Eunice",city:"Abidjan",friend:true},
+ {id:3,name:"Daniel",city:"Bouaké",friend:false},{id:4,name:"Grâce",city:"Yamoussoukro",friend:false}
+];
+let state=JSON.parse(localStorage.getItem('cc_state')||'null')||{
+ user:null, friends:seedFriends, posts:[
+  {name:"Eunice",text:"Que Dieu vous fortifie tous aujourd'hui 🙏🏽",likes:4},
+  {name:"Samuel",text:"Quel verset vous encourage le plus cette semaine ?",likes:7}
+ ], prayers:["Prions pour la paix dans nos familles.","Que Dieu nous aide à rester fidèles à sa Parole."],
+ msgs:[{from:"Eunice",text:"Shalom ! Que Dieu te bénisse 🙏🏽"},{from:"me",text:"Amen ! Merci, à toi aussi."}]
+};
+function save(){localStorage.setItem('cc_state',JSON.stringify(state))}
+state.prayers=(state.prayers||[]).map(p=>typeof p==='string'?{t:p,d:'',done:false}:p);state.videos=state.videos||[];
+function login(){
+ const name=document.getElementById('loginName').value.trim()||"Ami de Christ";
+ const email=document.getElementById('loginEmail').value.trim()||"demo@christconnect.app";
+ state.user={name,email}; save(); showApp();
+}
+function showApp(){
+ document.getElementById('login').style.display='none';document.getElementById('app').style.display='block';
+ document.getElementById('welcome').textContent='Bienvenue, '+state.user.name+' ! 👋';
+ document.getElementById('profileName').textContent=state.user.name;document.getElementById('profileEmail').textContent=state.user.email;
+ document.getElementById('profileAvatar').textContent=state.user.name[0].toUpperCase();
+ renderAll();
+}
+function logout(){state.user=null;save();location.reload()}
+function go(id){
+ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.go===id));
+ if(id==='communaute')renderFeed(); if(id==='amis')renderFriends(); if(id==='messages')renderChat(); if(id==='priere')renderPrayers(); if(id==='bible')renderBible(); if(id==='medias')renderMedias();
+}
+const BIB='https://bible.helloao.org/api/fra_lsg/';
+let bib={books:null,loading:false,bk:0,ch:1,verses:[]};
+async function bibGet(p){const r=await fetch(BIB+p);if(!r.ok)throw new Error(r.status);return r.json()}
+function vtxt(c){return (Array.isArray(c)?c:[c]).map(x=>typeof x==='string'?x:(x&&x.text)||'').join(' ').replace(/\s+/g,' ').trim()}
+const PETITS=['de','des','du','la','le','les','aux','et','d','l'];
+function bname(b){let n=(b.commonName||b.name||'').toLowerCase().replace(/(^|[\s'’-])(\p{L})/gu,(m,a,c)=>a+c.toUpperCase());return n.split(' ').map((w,i)=>i&&PETITS.includes(w.toLowerCase())?w.toLowerCase():w).join(' ')}
+async function bibInit(){
+ if(bib.books||bib.loading)return;bib.loading=true;const st=document.getElementById('bibStatus');st.textContent='Chargement de la Bible…';
+ try{const j=await bibGet('books.json');bib.books=j.books;
+  document.getElementById('bkSel').innerHTML=bib.books.map((b,i)=>`<option value="${i}">${escapeHtml(bname(b))}</option>`).join('');
+  let jn=bib.books.findIndex(b=>b.id==='JHN');if(jn<0)jn=0;document.getElementById('bkSel').value=jn;bib.bk=jn;bibFillCh(3);
+  await bibOpen();
+ }catch(e){bib.books=null;st.textContent='Impossible de charger la Bible. Connecte-toi à internet une première fois, puis réessaie.'}
+ bib.loading=false}
+function bibFillCh(sel){const n=bib.books[bib.bk].numberOfChapters;document.getElementById('chSel').innerHTML=Array.from({length:n},(_,i)=>`<option value="${i+1}">Chapitre ${i+1}</option>`).join('');document.getElementById('chSel').value=Math.min(sel||1,n)}
+function bibBook(){bib.bk=+document.getElementById('bkSel').value;bibFillCh(1);bibOpen()}
+async function bibOpen(){
+ if(!bib.books)return;bib.bk=+document.getElementById('bkSel').value;bib.ch=+document.getElementById('chSel').value;const b=bib.books[bib.bk],st=document.getElementById('bibStatus');
+ st.textContent='Chargement…';
+ try{const j=await bibGet(b.id+'/'+bib.ch+'.json');
+  bib.verses=(j.chapter.content||[]).filter(x=>x.type==='verse').map(x=>({n:x.number,t:vtxt(x.content)}));
+  st.textContent=bname(b)+' '+bib.ch+' — Louis Segond 1910';renderBible(document.getElementById('bibSearch').value)
+ }catch(e){bib.verses=[];st.textContent='Chapitre indisponible hors connexion. Réessaie avec internet.';renderBible()}}
+function bibStep(d){const ch=document.getElementById('chSel'),n=bib.books?bib.books[bib.bk].numberOfChapters:0;if(!n)return;let c=bib.ch+d;
+ if(c<1){if(bib.bk===0)return;bib.bk--;document.getElementById('bkSel').value=bib.bk;bibFillCh(bib.books[bib.bk].numberOfChapters)}
+ else if(c>n){if(bib.bk>=bib.books.length-1)return;bib.bk++;document.getElementById('bkSel').value=bib.bk;bibFillCh(1)}
+ else ch.value=c;bibOpen();window.scrollTo(0,0)}
+function renderBible(q=""){
+ if(!bib.books){bibInit();return}
+ q=(q||'').toLowerCase();const v=bib.verses.filter(x=>(x.n+' '+x.t).toLowerCase().includes(q));
+ document.getElementById('bibleList').innerHTML=v.length?'<div class="card">'+v.map(x=>`<p style="line-height:1.55;margin:0 0 10px"><b style="color:var(--gold)">${escapeHtml(String(x.n))}</b> ${escapeHtml(x.t)}</p>`).join('')+'</div>':'<div class="empty">Aucun verset.</div>'}
+function filterBible(v){renderBible(v)}
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+function addPrayer(){let t=document.getElementById('prayerText').value.trim();if(!t)return;state.prayers.unshift({t:t,d:new Date().toLocaleDateString('fr-FR'),done:false});save();document.getElementById('prayerText').value='';renderPrayers()}
+function togglePrayer(i){state.prayers[i].done=!state.prayers[i].done;save();renderPrayers()}
+function delPrayer(i){if(confirm('Supprimer ce sujet de prière ?')){state.prayers.splice(i,1);save();renderPrayers()}}
+function renderPrayers(){document.getElementById('prayerList').innerHTML=state.prayers.map((p,i)=>`<div class="card">${p.done?'✅':'🙏'} ${escapeHtml(p.t)}${p.d?`<div class="time" style="margin-top:6px">${escapeHtml(p.d)}${p.done?' · Exaucée, gloire à Dieu !':''}</div>`:''}<div class="actions" style="margin-top:8px"><button class="secondary" onclick="togglePrayer(${i})">${p.done?'Rouvrir':'Exaucée ✓'}</button><button class="secondary" onclick="delPrayer(${i})">Supprimer</button></div></div>`).join('')||'<div class="empty">Aucun sujet de prière pour le moment.</div>'}
+function addPost(){let t=document.getElementById('postText').value.trim();if(!t)return;state.posts.unshift({name:state.user.name,text:t,likes:0});save();document.getElementById('postText').value='';renderFeed()}
+function renderFeed(){document.getElementById('feed').innerHTML=state.posts.map((p,i)=>`<div class="post"><div class="post-head"><div class="smallavatar">${p.name[0]}</div><div><div class="post-name">${p.name}</div><div class="time">Maintenant</div></div></div><div class="post-text">${escapeHtml(p.text)}</div><div class="actions"><button class="secondary" onclick="state.posts[${i}].likes++;save();renderFeed()">❤️ ${p.likes}</button><button class="secondary" onclick="go('messages')">💬 Écrire</button></div></div>`).join('')}
+function renderFriends(){
+ let mine=state.friends.filter(x=>x.friend);
+ document.getElementById('friends').innerHTML=mine.length?mine.map(f=>`<div class="friend"><div class="friend-info"><div class="smallavatar">${f.name[0]}</div><div><b>${f.name}</b><div class="time">${f.city}</div></div></div><button class="secondary" onclick="go('messages')">Message</button></div>`).join(''):'<div class="empty">Tu n’as pas encore d’ami ajouté.</div>';
+ let q=(document.getElementById('friendSearch')?.value||'').toLowerCase();
+ document.getElementById('discover').innerHTML=state.friends.filter(x=>!x.friend&&x.name.toLowerCase().includes(q)).map(f=>`<div class="friend"><div class="friend-info"><div class="smallavatar">${f.name[0]}</div><div><b>${f.name}</b><div class="time">${f.city}</div></div></div><button class="primary" onclick="addFriend(${f.id})">Ajouter</button></div>`).join('')||'<div class="empty">Aucune personne trouvée.</div>';
+}
+function addFriend(id){let f=state.friends.find(x=>x.id===id);f.friend=true;save();renderFriends()}
+function renderChat(){document.getElementById('chat').innerHTML=state.msgs.map(m=>`<div class="chat ${m.from==='me'?'me':''}"><div class="bubble">${escapeHtml(m.text)}</div></div>`).join('')}
+function sendMsg(){let t=document.getElementById('msgText').value.trim();if(!t)return;state.msgs.push({from:"me",text:t});save();document.getElementById('msgText').value='';renderChat()}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function ytId(u){let m=(u||'').match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/);return m?m[1]:null}
+function addVideo(){let t=document.getElementById('vidTitle').value.trim(),id=ytId(document.getElementById('vidUrl').value);if(!id){alert('Lien YouTube non reconnu. Copie le lien depuis YouTube (Partager > Copier le lien).');return}
+ state.videos.unshift({t:t||'Vidéo',id:id});save();document.getElementById('vidTitle').value='';document.getElementById('vidUrl').value='';renderMedias()}
+function delVideo(i){if(confirm('Retirer cette vidéo ?')){state.videos.splice(i,1);save();renderMedias()}}
+function renderMedias(){document.getElementById('videoList').innerHTML=state.videos.map((v,i)=>`<div class="card"><b>${escapeHtml(v.t)}</b><iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(v.id)}" loading="lazy" allowfullscreen style="width:100%;aspect-ratio:16/9;border:0;border-radius:14px;margin-top:10px"></iframe><div class="actions" style="margin-top:8px"><button class="secondary" onclick="delVideo(${i})">Retirer</button></div></div>`).join('')||'<div class="empty">Ajoute ta première vidéo avec un lien YouTube.</div>'}
+function renderAll(){renderMedias();renderBible();renderPrayers();renderFeed();renderFriends();renderChat()}
+if(state.user)showApp();
+</script>
+</body>
+</html>
